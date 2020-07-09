@@ -9,6 +9,16 @@ fixtures:
     inifile:
       repo: "puppetlabs/inifile"
       ref: "4.2.0"
+    stdlib:
+      repo: "puppetlabs/stdlib"
+    node_manager:
+      repo: "WhatsARanjit/node_manager"
+    bolt_shim:
+      repo: "puppetlabs/bolt_shim"
+    apply_helpers:
+      repo: "puppetlabs/apply_helpers"
+    format:
+      repo: "puppet/format"
   repositories:
     "stdlib":
       "repo": "git://github.com/puppetlabs/puppetlabs-stdlib.git"
@@ -18,3 +28,4 @@ fixtures:
     puppet_agent: 'git://github.com/puppetlabs/puppetlabs-puppet_agent.git'
     provision: 'git://github.com/puppetlabs/provision.git'
     servicenow_tasks: 'git://github.com/puppetlabs/servicenow_tasks.git'
+    peadm: 'git://github.com/puppetlabs/puppetlabs-peadm'
