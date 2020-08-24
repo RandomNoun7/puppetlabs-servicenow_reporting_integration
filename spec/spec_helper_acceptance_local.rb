@@ -24,7 +24,12 @@ def set_sitepp_content(manifest)
   }
   HERE
 
-  write_file(master, '/etc/puppetlabs/code/environments/production/manifests/site.pp', content)
+  dest = '/etc/puppetlabs/code/environments/production/manifests/site.pp'
+
+  write_file(master, dest, content)
+  # Ensure changes to site.pp are recognized and change the owner so the next run
+  # doesnt register an unwanted corrective change.
+  master.run_shell("/opt/puppetlabs/bin/puppetserver reload ; chown pe-puppet:pe-puppet #{dest}")
 end
 
 def write_file(target, dest, content)

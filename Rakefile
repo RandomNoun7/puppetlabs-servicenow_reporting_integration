@@ -121,13 +121,13 @@ namespace :acceptance do
     # bolt plan run peadm::provision download_mode=direct version=2019.7.0 master_host=rugged-caravan.delivery.puppetlabs.net console_password=pie --target linux_nodes --verbose
     params = {
       'download_mode'    => 'direct',
-      'version'          => '2019.7.0',
+      'version'          => '2019.6.0',
       'master_host'      => master.uri,
       'console_password' => 'pie'
     }
 
     result = master.run_bolt_plan('peadm::provision', params, {expect_failures: true})
-    # master.bolt_run_script('spec/support/acceptance/install_pe.sh')
+    require 'pry'; binding.pry;
     # Setup hiera-eyaml config
     master.run_shell('rm -rf /etc/eyaml')
     master.bolt_upload_file('spec/support/common/hiera-eyaml', '/etc/eyaml')
