@@ -228,7 +228,7 @@ module Puppet::Util::Servicenow
   end
   module_function :calculate_satisfied_conditions
 
-  def report_description(settings_hash, resource_statuses, transaction_completed)
+  def report_description(settings_hash, resource_statuses, transaction_completed, transaction_uuid)
     resourse_status_summary = human_readable_event_summary(resource_statuses)
     labels                  = description_report_labels(resource_statuses, transaction_completed)
     # Ideally, we'd like to link to the specific report here. However, fine-grained PE console links are
@@ -236,7 +236,7 @@ module Puppet::Util::Servicenow
     # best and most stable solution we can do (for now) is the description you see here.
     description =  labels.nil? ? '' : labels
     description << "\n\nEnvironment: #{environment}"
-    description << "\n\nSee the PE console for the full report. You can access the PE console at #{settings_hash['pe_console_url']}."
+    description << "\n\nSee the PE console for the full report. You can access the PE console at #{settings_hash['pe_console_url']}. #{report_url(transaction_uuid, settings_hash['pe_console_url'])}"
     description << "\n\nResource Statuses:\n#{resourse_status_summary}" unless resourse_status_summary.empty?
     description << "\n\nLog Output:\n#{log_messages}" if catalog_compilation_failure?(resource_statuses, transaction_completed)
     description << "\n\n== Facts ==\n#{selected_facts(settings_hash)}"
@@ -360,6 +360,21 @@ module Puppet::Util::Servicenow
     resource_statuses.empty? && !transaction_completed
   end
   module_function :catalog_compilation_failure?
+
+  def report_url(transaction_uuid, pe_console_url)
+    require 'pry'; binding.pry;
+    uri = URI.parse("http://localhost:8080/pdb/query/v4/reports?query=%5B%22%3D%22%2C%22transaction_uuid%22%2C%20%22869c446d-89ff-4ee3-b598-4fcaa3169d5b%22%5D")
+    res = Net::HTTP.start(uri.host,uri.port, use_ssl: false) do |http|
+      request = Net::HTTP::Get.new("#{uri.path}?#{uri.query}", { 'Content-Type' => 'application/json' })
+      # request.body = 'query=["=","transaction_uuid","'+transaction_uuid+'"]'
+      require 'pry'; binding.pry;
+      http.request(request)
+    end
+
+    require 'pry'; binding.pry;
+    res
+  end
+  module_function :report_url
 end
 
 # takes the instance string from the settings and prepends 'https://' if not already present.
