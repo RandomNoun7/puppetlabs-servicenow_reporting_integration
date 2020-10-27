@@ -236,7 +236,7 @@ module Puppet::Util::Servicenow
     # best and most stable solution we can do (for now) is the description you see here.
     description =  labels.nil? ? '' : labels
     description << "\n\nEnvironment: #{environment}"
-    description << "\n\nSee the PE console for the full report. You can access the PE console at #{settings_hash['pe_console_url']}. #{report_url(transaction_uuid, settings_hash['pe_console_url'])}"
+    description << "\n\nSee the PE console for the full report. #{report_url(transaction_uuid, settings['pe_console_url'])}"
     description << "\n\nResource Statuses:\n#{resourse_status_summary}" unless resourse_status_summary.empty?
     description << "\n\nLog Output:\n#{log_messages}" if catalog_compilation_failure?(resource_statuses, transaction_completed)
     description << "\n\n== Facts ==\n#{selected_facts(settings_hash)}"
@@ -362,17 +362,20 @@ module Puppet::Util::Servicenow
   module_function :catalog_compilation_failure?
 
   def report_url(transaction_uuid, pe_console_url)
-    require 'pry'; binding.pry;
-    uri = URI.parse("http://localhost:8080/pdb/query/v4/reports?query=%5B%22%3D%22%2C%22transaction_uuid%22%2C%20%22869c446d-89ff-4ee3-b598-4fcaa3169d5b%22%5D")
-    res = Net::HTTP.start(uri.host,uri.port, use_ssl: false) do |http|
-      request = Net::HTTP::Get.new("#{uri.path}?#{uri.query}", { 'Content-Type' => 'application/json' })
-      # request.body = 'query=["=","transaction_uuid","'+transaction_uuid+'"]'
-      require 'pry'; binding.pry;
-      http.request(request)
+    res = nil
+    loop_start = Time.now
+    url = pe_console_url
+    # There's a race condition here. Our report processer will execute before
+    # pdb is ready to give us this hash. We need to query pdb until the hash is
+    # ready, but we don't want to get stuck too long in case there's a problem.
+    # The 2 down there ensures we never spend more than 2 seconds waiting on pdb
+    # before we just move on.
+    until !res.nil? || (Time.now - loop_start >= 2) do
+      res = '' #Puppet::Util::Puppetdb.query_puppetdb("reports[hash] {transaction_uuid = '#{transaction_uuid}'}").first
     end
 
-    require 'pry'; binding.pry;
-    res
+    url << "/#/enforcement/report/#{res['hash']}" unless res.nil? || !(res.has_key? 'hash')
+    url
   end
   module_function :report_url
 end
