@@ -10,6 +10,7 @@ The ServiceNow reporting integration module ships with a `servicenow` report pro
     * [Incidents](#incidents)
 3. [Troubleshooting](#troubleshooting)
 4. [Development](#development)
+5. [Known Issues](#known-issues)
 
 ## Pre-reqs
 
@@ -144,3 +145,7 @@ bundle exec rake acceptance:tear_down
 Since the high-level setup is separate from the tests, you should be able to re-run a failed test multiple times via `bundle exec rspec spec/acceptance/path/to/test.rb`.
 
 **Note:** Sometimes, the modules in `spec/fixtures/modules` could be out-of-sync. If you see a weird error related to one of those modules, try running `bundle exec rake spec_prep` to make sure they're updated.
+
+## Known Issues
+
+- PE Console URL in Event/Incident description may not work in PE versions older than 2019.8
